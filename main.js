@@ -106,8 +106,8 @@ const videoBtnModal = () => {
 };
 
 // Video component with default arg value
-// = 'cNjIUSDnb9k'
-const videoPlayer = (videoId) => {
+// = 'PlxWf493en4' default 
+const videoPlayer = (videoId = 'PlxWf493en4') => {
   const domString = `
   <iframe src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   `;
@@ -161,6 +161,17 @@ const eventListeners = () => {
   document.querySelector('#filterContainer').addEventListener('click', (e) => {
     console.log("You clicked a filter button", e.target.id);
     // filter on category (either use .filter or a loop)
+    if (e.target.id === 'clear'){
+      cardsOnDom(data);
+    } else if (e.target.id === 'favorite'){
+      //.filter  array method to filter and search based on condition
+      const favs = data.filter(taco => taco.favorite === true);
+      cardsOnDom(favs);
+      //if there is an id
+    } else if (e.target.id) {
+      const topics = data.filter(taco => taco.category === e.target.id);
+      cardsOnDom(topics);
+    }
     // rerender DOM with new array (use the cardsOnDom function)
   });
 
@@ -169,13 +180,24 @@ const eventListeners = () => {
     // check to make sure e.target.id is not empty
     if (e.target.id) {
       // get the video ID off the button ID
-      // find the index of the object in the array
+      // console.log(e.target.id.split("--")) the -- is a separator for .split()
+      // const videoStuff = e.target.id.split("--");
+      // console.log(videoStuff[1]);
+
+
+      //destructuring so method is videoStuff[0] videoID is videoStuff[1]
+      const [method, videoID] = e.target.id.split("--");
+      console.log(['method',method]);
+      // find the index of the object in the array (use findIndex)
+      const index = data.findIndex(taco => taco.videoID === videoID);
+      console.log(index);
 
       // only listen for events with "watch" or "delete" included in the string
 
       // if watch: grab the ID and rerender the videoPlayer with that ID as an argument
-      if (e.target.id.includes('watch')) {
-        console.log("Pressed Watch Button")        
+      if (e.target.id.includes('watch')) { //if i press a button and if the target of id includes 'watch' then i know is a watch button
+        console.log("Pressed Watch Button")
+        videoPlayer(videoID);        
         
         
         // scroll to top of page
@@ -186,7 +208,10 @@ const eventListeners = () => {
       // NOTE: if 2 videos have the same videoId, this will delete the first one in the array
       if (e.target.id.includes('delete')) {
         console.log("Delete Button Pressed")
+        //use splice array method to break up array
+        data.splice(index,1);
         // rerender DOM with updated data array (use the cardsOnDom function)
+        cardsOnDom(data);
       }
     }
   });
@@ -194,11 +219,18 @@ const eventListeners = () => {
   // FORM SUBMIT
   const form = document.querySelector('form');
   form.addEventListener('submit', (e) => {
-    e.preventDefault(); // this goes in EVERY form submit to prevent page reload
+    e.preventDefault(); // this goes in EVERY FORM SUBMIT to prevent page reload
     // grab the values from the form inputs and create an object
-    // push that object to the data array    
+    const newVideoObject = {
+      videoId: document.querySelector('#videoId').value,
+      title: document.querySelector('#title').value,
+      category: document.querySelector('#category').value,
+      favorite: document.querySelector('#favorite').checked,
+    }
+    // push that object to the data array
+    data.push(newVideoObject);
     // rerender cards using the cardsOnDom function and pass it the updated data array
-    
+    cardsOnDom(data);
     
     // Close modal and reset form
     formModal.hide()
